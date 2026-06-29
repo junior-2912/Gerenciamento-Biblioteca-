@@ -6,4 +6,6 @@ public interface Repositorio <T>{
     void salvar(T item);
 
     List<T> buscarTodos();
+
+    T buscarPorId(int id);
 }
