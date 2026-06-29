@@ -5,10 +5,10 @@ import enums.StatusLivro;
 public class Livro {
     private String titulo;
     private String autor;
-    private String isbn;
+    private int isbn;
     private StatusLivro statusLivro;
     
-    public Livro(String titulo, String autor, String isbn, StatusLivro statusLivro) {
+    public Livro(String titulo, String autor, int isbn, StatusLivro statusLivro) {
         this.titulo = titulo;
         this.autor = autor;
         this.isbn = isbn;
@@ -23,7 +23,7 @@ public class Livro {
         return autor;
     }
 
-    public String getIsbn() {
+    public int getIsbn() {
         return isbn;
     }
 
