@@ -1,7 +1,14 @@
 package repository;
 
 import entities.Emprestimo;
+import enums.StatusLivro;
+import exceptions.ElementoNaoEncontradoException;
+import exceptions.LimiteEmprestimoUsuarioException;
+import exceptions.LivroNaoDisponivelException;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
@@ -10,8 +17,26 @@ public class RepositorioEmprestimo implements Repositorio<Emprestimo> {
     private Set<Emprestimo> emprestimos = new HashSet<>();
 
     @Override
-    public void salvar(Emprestimo item) {
-        emprestimos.add(item);
+    public boolean salvar(Emprestimo item) {
+        //Verificando se o livro esta disponível.
+        if (item.getLivro().getStatusLivro() == StatusLivro.DISPONIVEL) {
+            //Verificando se o usuário não ultrapassou o limite de emprestimos.
+            if (item.getUsuario().getNEmprestimos() < 5) {
+                item.getUsuario().addEmprestimo(item);
+                item.getLivro().emprestar();
+                adicionarArquivo(item);
+                return emprestimos.add(item);
+            } else {
+                throw new LimiteEmprestimoUsuarioException("O usuario chegou ao limite de emprestimos permitidos!");
+            }
+        } else {
+            throw new LivroNaoDisponivelException("O livro nao esta disponivel! ");
+        }
+
+    }
+
+    public boolean removerEmprestimo(Emprestimo emprestimo) {
+        return emprestimos.remove(emprestimo);
     }
 
     @Override
@@ -21,11 +46,20 @@ public class RepositorioEmprestimo implements Repositorio<Emprestimo> {
                 return emprestimo;
             }
         }
-        return null;
+        throw new ElementoNaoEncontradoException("O emprestimo com id informado nao foi encontrado!");
     }
 
     @Override
     public List<Emprestimo> buscarTodos() {
         return emprestimos.stream().toList();
+    }
+
+    public void adicionarArquivo(Emprestimo item) {
+        try (BufferedWriter bw = new BufferedWriter(new FileWriter("c:\\windows\\temp\\emprestimos.csv", true))) {
+            bw.write(item.toString());
+            bw.newLine();
+        } catch (IOException e) {
+            System.out.println(e.getMessage());
+        }
     }
 }
